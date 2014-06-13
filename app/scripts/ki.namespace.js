@@ -2,7 +2,7 @@
 /**
  * Created by holger on 12.06.2014.
  */
-/* namespace ki, see book "JavaScrip Patterns, p. 89f */
+/* namespace ki, see book "JavaScript Patterns, p. 89f */
 var ki = ki || {};
 ki.namespace = function (ns_string) {
     var parts = ns_string.split('.'),
