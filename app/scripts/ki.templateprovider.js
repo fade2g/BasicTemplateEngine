@@ -28,6 +28,29 @@ ki.templateprovider = (function() {
         }
     }
 
+    function _unregisterTemplate(templateName) {
+        if (templateName && templateName !== '') {
+            ki.helper.logInfo('Unregister template with name ' + templateName);
+            if(templates[templateName]) {
+                delete templates[templateName];
+            } else {
+                ki.helper.logInfo('Template ' + templateName + ' was not registered at all');
+            }
+        }
+    }
+
+    function _getTemplate(templateName) {
+        if (templateName && templateName !== '') {
+            if(templates[templateName]) {
+                return templates[templateName];
+            } else {
+                ki.helper.logWarn('Unknown template ' + templateName);
+            }
+        } else {
+            ki.help.logWarn('Required template name is missing');
+        }
+    }
+
     /**
      * This function initializes the known templates.
      * This is done by registering this function to the document.ready event and pars the HTML for
@@ -72,10 +95,13 @@ ki.templateprovider = (function() {
          * @param templatename {String} name of the template
          */
         getTemplate: function(templateName) {
-
+            return _getTemplate(templateName);
         },
         registerTemplate: function(templateName, template) {
-
+            _registerTemplate(templateName, template);
+        },
+        unregisterTemplate: function(templateName) {
+            _unregisterTemplate(templateName);
         },
         init: function() {
             _init();
