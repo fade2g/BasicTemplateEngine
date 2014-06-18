@@ -57,24 +57,25 @@ ki.services = (function() {
         }
     ];
 
-    function checkLoopProperties(dataArray, idProperty) {
+    var helperFunctions = {},
+        serviceFunctions = {};
+    helperFunctions.checkLoopProperties = function checkLoopProperties(dataArray, idProperty) {
         if(dataArray === undefined || idProperty === undefined) {
             ki.helper.logWarn('Searching new ID with incomplete data, dataArray=' + dataArray + ", idProperty=" + idProperty);
             return false;
         }
         return true;
-    }
+    };
 
     /**
      * This function generates a new ID for the article
      * @param dataArray {object[]} array to search for an id
      * @param idProperty {String} name of the property, that contains the id value
-     * @return return the new max value or -1 if no value could be found
-     * @private
+     * @return {Number} return the new max value or -1 if no value could be found
      */
-    function _getNewId(dataArray, idProperty) {
+    helperFunctions.getNewId = function getNewId(dataArray, idProperty) {
         var maxValue = -1;
-        if(checkLoopProperties(dataArray, idProperty)) {
+        if(helperFunctions.checkLoopProperties(dataArray, idProperty)) {
             for (var i = 0, len = dataArray.length; i < len; i += 1) {
                 maxValue = (dataArray[i][idProperty] && dataArray[i][idProperty]) > maxValue ? dataArray[i][idProperty] : maxValue;
             }
@@ -82,10 +83,17 @@ ki.services = (function() {
             ki.helper.logDebug('New max value ' + maxValue);
         }
         return maxValue;
-    }
+    };
 
-    function _findPositionById(dataArray, idProperty, idValue) {
-        if(!checkLoopProperties(dataArray, idProperty)) {
+    /**
+     * This function finds an element with a given id in an array
+     * @param dataArray {object[]}
+     * @param idProperty [String}
+     * @param idValue {Number}
+     * @return {number}
+     */
+    helperFunctions.findPositionById = function findPositionById(dataArray, idProperty, idValue) {
+        if(!helperFunctions.checkLoopProperties(dataArray, idProperty)) {
             return;
         }
         for (var i = 0, len = dataArray.length; i < len; i += 1) {
@@ -95,7 +103,7 @@ ki.services = (function() {
             }
         }
         ki.helper.logInfo('Found no item with id ' + idValue);
-    }
+    };
 
     /**
      * This function loops over the data array and searches each element for a given property and add every matching element
@@ -106,9 +114,9 @@ ki.services = (function() {
      * @return {Array} The matching elements of the original array
      * @private
      */
-    function _filterCommentsForArticle(dataArray, idProperty, idValue) {
+    helperFunctions.filterCommentsForArticle = function filterCommentsForArticle(dataArray, idProperty, idValue) {
         var resultSet = [];
-        if (!checkLoopProperties(dataArray, idProperty) && idValue) {
+        if (!helperFunctions.checkLoopProperties(dataArray, idProperty) && idValue) {
             return;
         }
 
@@ -119,71 +127,71 @@ ki.services = (function() {
             }
         }
         return resultSet;
-    }
+    };
 
-    var _getArticles = function() {
+    serviceFunctions.getArticles = function getArticles() {
         ki.helper.logDebug('Returning articles ' + cachedArticles);
         return cachedArticles;
-    }
+    };
 
-    function _addArticle(article) {
+    serviceFunctions.addArticle = function addArticle(article) {
         // Do possibly some validation...
-        var newId = _getNewId(cachedArticles, 'id');
+        var newId = helperFunctions.getNewId(cachedArticles, 'id');
         article.id = newId;
         cachedArticles.push(article);
-    }
+    };
 
-    function _updateArticle(newArticle) {
+    serviceFunctions.updateArticle = function updateArticle(newArticle) {
         var position;
-        position = _findPositionById(cachedArticles, 'id', newArticle.id);
+        position = helperFunctions.findPositionById(cachedArticles, 'id', newArticle.id);
         if (position !== undefined) {
             cachedArticles[position] = newArticle;
         } else {
             ki.helper.logWarn('Article not found in cached articles. Article was ' + newArticle);
         }
-    }
+    };
 
-    function _deleteArticle(id) {
+    serviceFunctions.deleteArticle = function deleteArticle(id) {
         var position;
-        position = _findPositionById(cachedArticles, 'id', id);
+        position = helperFunctions.findPositionById(cachedArticles, 'id', id);
         if (position !== undefined) {
             cachedArticles.splice([position],1);
         } else {
             ki.helper.logWarn('Article id ' + id + ' not found in cached articles.');
         }
-    }
+    };
 
-    function _getComments(articleId) {
+    serviceFunctions.getComments = function getComments(articleId) {
         ki.helper.logDebug('Returning comments for article ' + articleId);
-        return _filterCommentsForArticle(cachedComments, 'articleId', articleId);
-    }
+        return helperFunctions.filterCommentsForArticle(cachedComments, 'articleId', articleId);
+    };
 
-    function _updateComment(newComment) {
+    serviceFunctions.updateComment = function updateComment(newComment) {
         var position;
-        position = _findPositionById(cachedComments, 'id', newComment.id);
+        position = helperFunctions.findPositionById(cachedComments, 'id', newComment.id);
         if (position !== undefined) {
             cachedComments[position] = newComment;
         } else {
             ki.helper.logWarn('Comment not found in cached articles. Comment was ' + newComment);
         }
-    }
+    };
 
-    function _addComment(newComment) {
+    serviceFunctions.addComment = function addComment(newComment) {
         // Do possibly some validation...
-        var newId = _getNewId(cachedComments, 'id');
+        var newId = helperFunctions.getNewId(cachedComments, 'id');
         newComment.id = newId;
         cachedComments.push(newComment);
-    }
+    };
 
-    function _deleteComment(id) {
+    serviceFunctions.deleteComment = function deleteComment(id) {
         var position;
-        position = _findPositionById(cachedComments, 'id', id);
+        position = helperFunctions.findPositionById(cachedComments, 'id', id);
         if (position !== undefined) {
             cachedComments.splice([position],1);
         } else {
             ki.helper.logWarn('Comment id ' + id + ' not found in cached comments.');
         }
-    }
+    };
 
     return {
         /**
@@ -191,14 +199,14 @@ ki.services = (function() {
          * @return {article[]}
          */
         getArticles: function() {
-            return _getArticles();
+            return serviceFunctions.getArticles();
         },
         /**
          * This function updates an article in the articleCache
          * @param {article} newArticle
          */
         updateArticle: function(newArticle) {
-            _updateArticle(newArticle);
+            serviceFunctions.updateArticle(newArticle);
         },
         /**
          * This method add a new article to the list of articles
@@ -206,10 +214,10 @@ ki.services = (function() {
          * @param {article} newArticle
          */
         addArticle: function(newArticle) {
-            _addArticle(newArticle);
+            serviceFunctions.addArticle(newArticle);
         },
         deleteArticle: function(id) {
-            _deleteArticle(id);
+            serviceFunctions.deleteArticle(id);
         },
         /**
          * This function returns the comments for a given articleId
@@ -217,16 +225,16 @@ ki.services = (function() {
          * @return comment[]
          */
         getComments: function(articleId) {
-            return _getComments(articleId);
+            return serviceFunctions.getComments(articleId);
         },
         updateComment: function(updatedComment) {
-            _updateComment(updatedComment)
+            serviceFunctions.updateComment(updatedComment)
         },
         addComment: function(newComment) {
-            _addComment(newComment)
+            serviceFunctions.addComment(newComment)
         },
         deleteComment: function(id) {
-            _deleteComment(id);
+            serviceFunctions.deleteComment(id);
         }
     };
 })();
