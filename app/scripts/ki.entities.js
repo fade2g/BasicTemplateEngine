@@ -65,6 +65,9 @@ ki.entities = (function() {
                 console.log('Could not change value');
             }
         },
+        getBean: function getBean() {
+            return this.observedBean;
+        }
     };
 
     return {
